@@ -17,7 +17,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-   
+
       <section className="bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 py-28">
         <div className="max-w-8xl mx-auto px-6 sm:px-10 lg:px-16">
           <div className="text-center">
@@ -52,7 +52,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
       </section>
 
 
-     
+
       <section className="py-28 bg-white dark:bg-gray-800">
         <div className="max-w-8xl mx-auto px-6 sm:px-10 lg:px-16">
           <div className="text-center mb-20">
@@ -99,7 +99,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
       </section>
 
 
-    
+
       <section id="products" className="py-20 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -175,12 +175,13 @@ export function Home({ onAddProductClick, onContactSeller }) {
         </div>
       </section>
 
-      
+
       <footer className="bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 py-20 w-full">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-          
-            <div>
+
+            {/* Brand Section */}
+            <div className="text-left sm:text-center md:text-left">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">CampusKart</h1>
               <p className="text-lg text-gray-900 dark:text-white">
                 Your campus marketplace for affordable, safe, and student-focused trading.
@@ -194,8 +195,8 @@ export function Home({ onAddProductClick, onContactSeller }) {
               </div>
             </div>
 
-           
-            <div className="ml-16">
+            {/* Quick Links */}
+            <div className="text-left sm:text-center md:text-left">
               <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Quick Links</h4>
               <ul className="space-y-2">
                 <li><a href="#" className="hover:text-white">Start Selling</a></li>
@@ -205,8 +206,8 @@ export function Home({ onAddProductClick, onContactSeller }) {
               </ul>
             </div>
 
-         
-            <div>
+            {/* Legal Section */}
+            <div className="text-left sm:text-center md:text-left">
               <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Legal</h4>
               <ul className="space-y-2">
                 <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
@@ -216,8 +217,8 @@ export function Home({ onAddProductClick, onContactSeller }) {
               </ul>
             </div>
 
-           
-            <div>
+            {/* Contact Section */}
+            <div className="text-left sm:text-center md:text-left">
               <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Get In Touch</h4>
               <ul className="space-y-2 text-lg">
                 <li>
@@ -235,7 +236,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
             </div>
           </div>
 
-
+          {/* Footer Bottom */}
           <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between">
             <p className="text-sm text-gray-400">
               © {new Date().getFullYear()} CampusKart. All rights reserved.
@@ -246,9 +247,6 @@ export function Home({ onAddProductClick, onContactSeller }) {
           </div>
         </div>
       </footer>
-
-
-
     </div>
   );
 }

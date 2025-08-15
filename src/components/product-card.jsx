@@ -22,20 +22,31 @@ const conditionColors = {
 };
 
 export function ProductCard({ product, onContact }) {
-  const { addItem, items } = useCart();
-  const isInCart = items.some(item => item._id === product._id);
+  const { addItem, removeItem, items } = useCart();
 
-  const handleAddToCart = () => {
-    if (!isInCart) {
-      addItem(product);
+  // Normalize id to avoid type mismatch issues
+  const productId = String(product._id);
+  const isInCart = items.some(item => String(item._id) === productId);
+
+  const handleCartToggle = () => {
+    if (isInCart) {
+      removeItem(productId);
+    } else {
+      addItem({
+        ...product,
+        _id: productId, // normalize
+      });
     }
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1" data-testid={`product-card-${product._id}`}>
+    <div
+      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+      data-testid={`product-card-${productId}`}
+    >
       {/* Product Image */}
       <div className="aspect-video bg-gray-100 dark:bg-gray-700 overflow-hidden">
-        {product.images && product.images.length > 0 ? (
+        {product.images?.length > 0 ? (
           <img
             src={product.images[0]}
             alt={product.title}
@@ -65,17 +76,17 @@ export function ProductCard({ product, onContact }) {
 
         {/* Category and Condition Badges */}
         <div className="flex gap-2 mb-4 flex-wrap">
-          <Badge 
+          <Badge
             className={`text-xs font-medium px-2 py-1 rounded-full ${categoryColors[product.category] || categoryColors.other}`}
             data-testid="product-category"
           >
-            {product.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            {product.category?.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}
           </Badge>
-          <Badge 
+          <Badge
             className={`text-xs font-medium px-2 py-1 rounded-full ${conditionColors[product.condition] || conditionColors.good}`}
             data-testid="product-condition"
           >
-            {product.condition?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            {product.condition?.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}
           </Badge>
         </div>
 
@@ -94,13 +105,12 @@ export function ProductCard({ product, onContact }) {
             Contact Seller
           </Button>
           <Button
-            onClick={handleAddToCart}
+            onClick={handleCartToggle}
             variant={isInCart ? "secondary" : "outline"}
-            disabled={isInCart}
             className="px-3 text-sm transition-colors duration-200"
             data-testid="button-add-to-cart"
           >
-            {isInCart ? "In Cart" : "Add to Cart"}
+            {isInCart ? "Remove" : "Add to Cart"}
           </Button>
         </div>
       </div>

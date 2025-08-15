@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card.jsx";
 import { Shield, DollarSign, Users, Search, Plus } from "lucide-react";
@@ -9,6 +10,16 @@ export function Home({ onAddProductClick, onContactSeller }) {
     queryKey: ["/api/products"],
   });
 
+  const [cartItems, setCartItems] = useState([]);
+
+  const handleAddToCart = (productId) => {
+    setCartItems((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
   const featuredProducts = products.slice(0, 8);
 
   const scrollToProducts = () => {
@@ -18,6 +29,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
 
+      {/* HERO SECTION */}
       <section className="bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 py-28">
         <div className="max-w-8xl mx-auto px-6 sm:px-10 lg:px-16">
           <div className="text-center">
@@ -51,8 +63,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
         </div>
       </section>
 
-
-
+      {/* WHY CHOOSE SECTION */}
       <section className="py-28 bg-white dark:bg-gray-800">
         <div className="max-w-8xl mx-auto px-6 sm:px-10 lg:px-16">
           <div className="text-center mb-20">
@@ -98,8 +109,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
         </div>
       </section>
 
-
-
+      {/* PRODUCTS SECTION */}
       <section id="products" className="py-20 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -153,6 +163,8 @@ export function Home({ onAddProductClick, onContactSeller }) {
                     key={product._id}
                     product={product}
                     onContact={onContactSeller}
+                    inCart={cartItems.includes(product._id)}
+                    onAddToCart={() => handleAddToCart(product._id)}
                   />
                 ))}
               </div>
@@ -175,7 +187,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
         </div>
       </section>
 
-
+      {/* FOOTER */}
       <footer className="bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 py-20 w-full">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">

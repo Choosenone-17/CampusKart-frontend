@@ -10,12 +10,9 @@ const __dirname = path.dirname(__filename);
 // Function to load plugins conditionally
 async function getPlugins() {
   const plugins = [react()];
-
-  // Only load Replit-specific plugins in dev on Replit
+  
   if (process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined) {
-    const runtimeErrorOverlay = await import("@replit/vite-plugin-runtime-error-modal");
     const cartographer = await import("@replit/vite-plugin-cartographer");
-    plugins.push(runtimeErrorOverlay.default());
     plugins.push(cartographer.cartographer());
   }
 
@@ -33,7 +30,7 @@ export default defineConfig(async () => ({
   },
   root: path.resolve(__dirname),
   build: {
-    outDir: path.resolve(__dirname, "../dist/public"),
+    outDir: path.resolve(__dirname, "dist"), // changed from ../dist/public
     emptyOutDir: true,
   },
   server: {

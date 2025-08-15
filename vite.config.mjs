@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { fileURLToPath } from "url";
 
 // Fix for ESM __dirname
@@ -10,10 +9,13 @@ const __dirname = path.dirname(__filename);
 
 // Function to load plugins conditionally
 async function getPlugins() {
-  const plugins = [react(), runtimeErrorOverlay()];
-  
+  const plugins = [react()];
+
+  // Only load Replit-specific plugins in dev on Replit
   if (process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined) {
+    const runtimeErrorOverlay = await import("@replit/vite-plugin-runtime-error-modal");
     const cartographer = await import("@replit/vite-plugin-cartographer");
+    plugins.push(runtimeErrorOverlay.default());
     plugins.push(cartographer.cartographer());
   }
 

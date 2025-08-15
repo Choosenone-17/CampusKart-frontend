@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://your-backend.vercel.app/api/$1"
+      "source": "/api/:path*",
+      "destination": "https://campuskart-backend-1t56.onrender.com/api/:path*"
     }
   ]
 }

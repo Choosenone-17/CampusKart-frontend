@@ -3,11 +3,16 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card.jsx";
 import { Shield, DollarSign, Users, Search, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from 'react-icons/fa';
+import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
+import api from "@/lib/api"; // ✅ import axios instance
 
 export function Home({ onAddProductClick, onContactSeller }) {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["/api/products"],
+    queryFn: async () => {
+      const res = await api.get("/api/products"); // ✅ fetch using api.js
+      return res.data;
+    },
   });
 
   const [cartItems, setCartItems] = useState([]);

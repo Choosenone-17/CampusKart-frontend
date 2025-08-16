@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import api from "../api"; // 👈 use axios instance with baseURL from .env
+import api from "../lib/api";
+
 
 export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
   const queryClient = useQueryClient();
@@ -34,7 +35,6 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
     setLoading(true);
 
     try {
-      // Upload images to backend -> Cloudinary
       const uploadedUrls = [];
       for (const file of files) {
         const formData = new FormData();

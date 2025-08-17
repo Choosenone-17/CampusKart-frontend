@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/product-card.jsx";
 import { Search, Plus } from "lucide-react";
+import api from "@/lib/api";
+
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -20,13 +22,12 @@ export function Products({ onAddProductClick, onContactSeller }) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Always fetch ALL products
+  // ✅ Use axios instance (api.js) instead of fetch
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const res = await fetch("/api/products");
-      if (!res.ok) throw new Error("Failed to fetch products");
-      return res.json();
+      const res = await api.get("/api/products");
+      return res.data;
     },
   });
 
@@ -126,7 +127,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
                   No products found
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-6">
-                  {searchQuery || selectedCategory !== "all" 
+                  {searchQuery || selectedCategory !== "all"
                     ? "Try adjusting your search or filters"
                     : "Be the first to list an item in this category!"}
                 </p>
@@ -144,7 +145,8 @@ export function Products({ onAddProductClick, onContactSeller }) {
             <>
               <div className="flex items-center justify-between mb-6">
                 <p className="text-gray-600 dark:text-gray-300">
-                  Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
+                  Showing {filteredProducts.length} product
+                  {filteredProducts.length !== 1 ? "s" : ""}
                   {selectedCategory !== "all" &&
                     ` in ${categories.find((c) => c.value === selectedCategory)?.label}`}
                 </p>

@@ -23,6 +23,10 @@ const conditionColors = {
   poor: "text-red-600 bg-red-100 dark:bg-red-900",
 };
 
+// Helper: format string to Title Case
+const formatLabel = (str = "") =>
+  str.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase());
+
 export function ProductCard({ product, onContact, onDeleted }) {
   const { addItem, removeItem, items } = useCart();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -30,9 +34,8 @@ export function ProductCard({ product, onContact, onDeleted }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Normalize id to avoid type mismatch issues
   const productId = String(product._id);
-  const isInCart = items.some(item => String(item._id) === productId);
+  const isInCart = items.some((item) => String(item._id) === productId);
 
   const handleCartToggle = () => {
     if (isInCart) {
@@ -55,6 +58,7 @@ export function ProductCard({ product, onContact, onDeleted }) {
       if (res.status === 204) {
         if (onDeleted) onDeleted(productId);
         setShowDeleteModal(false);
+        setDeleteKey("");
       } else {
         const data = await res.json();
         setError(data.message || "Failed to delete product");
@@ -104,14 +108,18 @@ export function ProductCard({ product, onContact, onDeleted }) {
         {/* Category and Condition Badges */}
         <div className="flex gap-2 mb-4 flex-wrap">
           <Badge
-            className={`text-xs font-medium px-2 py-1 rounded-full ${categoryColors[product.category] || categoryColors.other}`}
+            className={`text-xs font-medium px-2 py-1 rounded-full ${
+              categoryColors[product.category] || categoryColors.other
+            }`}
           >
-            {product.category?.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}
+            {formatLabel(product.category)}
           </Badge>
           <Badge
-            className={`text-xs font-medium px-2 py-1 rounded-full ${conditionColors[product.condition] || conditionColors.good}`}
+            className={`text-xs font-medium px-2 py-1 rounded-full ${
+              conditionColors[product.condition] || conditionColors.good
+            }`}
           >
-            {product.condition?.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}
+            {formatLabel(product.condition)}
           </Badge>
         </div>
 
@@ -171,7 +179,14 @@ export function ProductCard({ product, onContact, onDeleted }) {
               >
                 {loading ? "Deleting..." : "Delete"}
               </Button>
-              <Button onClick={() => setShowDeleteModal(false)} variant="outline">
+              <Button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteKey("");
+                  setError("");
+                }}
+                variant="outline"
+              >
                 Cancel
               </Button>
             </div>

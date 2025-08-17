@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { User } from "lucide-react";
 import { useCart } from "@/lib/cart";
+import { Input } from "@/components/ui/input";
 
 const categoryColors = {
   textbooks: "text-primary-500 bg-primary-50 dark:bg-primary-900",
@@ -21,8 +23,12 @@ const conditionColors = {
   poor: "text-red-600 bg-red-100 dark:bg-red-900",
 };
 
-export function ProductCard({ product, onContact }) {
+export function ProductCard({ product, onContact, onDeleted }) {
   const { addItem, removeItem, items } = useCart();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteKey, setDeleteKey] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Normalize id to avoid type mismatch issues
   const productId = String(product._id);
@@ -32,10 +38,31 @@ export function ProductCard({ product, onContact }) {
     if (isInCart) {
       removeItem(productId);
     } else {
-      addItem({
-        ...product,
-        _id: productId, // normalize
+      addItem({ ...product, _id: productId });
+    }
+  };
+
+  const handleDelete = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/products/${productId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deleteKey }),
       });
+
+      if (res.status === 204) {
+        if (onDeleted) onDeleted(productId);
+        setShowDeleteModal(false);
+      } else {
+        const data = await res.json();
+        setError(data.message || "Failed to delete product");
+      }
+    } catch (err) {
+      setError("Network error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,15 +89,15 @@ export function ProductCard({ product, onContact }) {
       {/* Product Details */}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 flex-1" data-testid="product-title">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 flex-1">
             {product.title}
           </h3>
-          <span className="text-xl font-bold text-primary-500 flex-shrink-0" data-testid="product-price">
+          <span className="text-xl font-bold text-primary-500 flex-shrink-0">
             ₹{product.price}
           </span>
         </div>
 
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-2" data-testid="product-description">
+        <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-2">
           {product.description}
         </p>
 
@@ -78,13 +105,11 @@ export function ProductCard({ product, onContact }) {
         <div className="flex gap-2 mb-4 flex-wrap">
           <Badge
             className={`text-xs font-medium px-2 py-1 rounded-full ${categoryColors[product.category] || categoryColors.other}`}
-            data-testid="product-category"
           >
             {product.category?.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}
           </Badge>
           <Badge
             className={`text-xs font-medium px-2 py-1 rounded-full ${conditionColors[product.condition] || conditionColors.good}`}
-            data-testid="product-condition"
           >
             {product.condition?.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}
           </Badge>
@@ -100,7 +125,6 @@ export function ProductCard({ product, onContact }) {
           <Button
             onClick={() => onContact(product)}
             className="flex-1 bg-primary-500 hover:bg-primary-600 text-white text-sm transition-colors duration-200"
-            data-testid="button-contact-seller"
           >
             Contact Seller
           </Button>
@@ -108,12 +132,52 @@ export function ProductCard({ product, onContact }) {
             onClick={handleCartToggle}
             variant={isInCart ? "secondary" : "outline"}
             className="px-3 text-sm transition-colors duration-200"
-            data-testid="button-add-to-cart"
           >
             {isInCart ? "Remove" : "Add to Cart"}
           </Button>
+          <Button
+            onClick={() => setShowDeleteModal(true)}
+            variant="destructive"
+            className="px-3 text-sm"
+          >
+            Delete
+          </Button>
         </div>
       </div>
+
+      {/* Delete Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-sm">
+            <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+              Delete Product
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+              Enter the delete key you received when posting this product.
+            </p>
+            <Input
+              type="password"
+              placeholder="Enter delete key"
+              value={deleteKey}
+              onChange={(e) => setDeleteKey(e.target.value)}
+              className="mb-3"
+            />
+            {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+            <div className="flex gap-2">
+              <Button
+                onClick={handleDelete}
+                disabled={loading}
+                className="bg-red-600 hover:bg-red-700 text-white flex-1"
+              >
+                {loading ? "Deleting..." : "Delete"}
+              </Button>
+              <Button onClick={() => setShowDeleteModal(false)} variant="outline">
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

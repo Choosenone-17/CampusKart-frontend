@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { v4 as uuidv4 } from "uuid";
 import api from "../lib/api";
-
 
 export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
   const queryClient = useQueryClient();
@@ -16,9 +16,12 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
     contactMethod: "email",
     contactDetails: "",
     images: [],
+    deleteKey: uuidv4(),   // ✅ use correct case
+    createdAt: new Date()
   });
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [deleteLink, setDeleteLink] = useState(null); // ✅ store delete link
 
   if (!isOpen) return null; 
 
@@ -57,7 +60,10 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
       if (onProductAdded) onProductAdded(res.data);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
 
-      onClose();
+      // ✅ Show delete link after successful upload
+      setDeleteLink(
+        `${window.location.origin}/api/products/delete/${res.data._id}?key=${res.data.deleteKey}`
+      );
     } catch (error) {
       console.error("Error adding product:", error);
     } finally {
@@ -77,108 +83,135 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
           ✖
         </button>
 
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-          Add Product
-        </h2>
+        {!deleteLink ? (
+          <>
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+              Add Product
+            </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="Title"
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
-          />
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder="Description"
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
-          />
-          <input
-            name="price"
-            value={form.price}
-            onChange={handleChange}
-            placeholder="Price"
-            type="number"
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
-          />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <input
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="Title"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
+              />
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                placeholder="Description"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
+              />
+              <input
+                name="price"
+                value={form.price}
+                onChange={handleChange}
+                placeholder="Price"
+                type="number"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
+              />
 
-          {/* Category */}
-          <select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          >
-            <option value="textbooks">Textbooks</option>
-            <option value="electronics">Electronics</option>
-            <option value="dorm-items">Dorm Items</option>
-            <option value="supplies">Supplies</option>
-            <option value="clothing">Clothing</option>
-            <option value="furniture">Furniture</option>
-            <option value="other">Other</option>
-          </select>
+              {/* Category */}
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="textbooks">Textbooks</option>
+                <option value="electronics">Electronics</option>
+                <option value="dorm-items">Dorm Items</option>
+                <option value="supplies">Supplies</option>
+                <option value="clothing">Clothing</option>
+                <option value="furniture">Furniture</option>
+                <option value="other">Other</option>
+              </select>
 
-          {/* Condition */}
-          <select
-            name="condition"
-            value={form.condition}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          >
-            <option value="new">New</option>
-            <option value="like-new">Like New</option>
-            <option value="good">Good</option>
-            <option value="fair">Fair</option>
-            <option value="poor">Poor</option>
-          </select>
+              {/* Condition */}
+              <select
+                name="condition"
+                value={form.condition}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="new">New</option>
+                <option value="like-new">Like New</option>
+                <option value="good">Good</option>
+                <option value="fair">Fair</option>
+                <option value="poor">Poor</option>
+              </select>
 
-          <input
-            name="sellerName"
-            value={form.sellerName}
-            onChange={handleChange}
-            placeholder="Seller Name"
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
-          />
+              <input
+                name="sellerName"
+                value={form.sellerName}
+                onChange={handleChange}
+                placeholder="Seller Name"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
+              />
 
-          {/* Contact */}
-          <select
-            name="contactMethod"
-            value={form.contactMethod}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          >
-            <option value="email">Email</option>
-            <option value="phone">Phone</option>
-            <option value="whatsapp">WhatsApp</option>
-            <option value="telegram">Telegram</option>
-          </select>
-          <input
-            name="contactDetails"
-            value={form.contactDetails}
-            onChange={handleChange}
-            placeholder="Contact Details"
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
-          />
+              {/* Contact */}
+              <select
+                name="contactMethod"
+                value={form.contactMethod}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="email">Email</option>
+                <option value="phone">Phone</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="telegram">Telegram</option>
+              </select>
+              <input
+                name="contactDetails"
+                value={form.contactDetails}
+                onChange={handleChange}
+                placeholder="Contact Details"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
+              />
 
-          {/* Image Upload */}
-          <input
-            type="file"
-            multiple
-            onChange={handleFileChange}
-            className="w-full text-gray-900 dark:text-white bg-white dark:bg-gray-700 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-600"
-          />
+              {/* Image Upload */}
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="w-full text-gray-900 dark:text-white bg-white dark:bg-gray-700 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-600"
+              />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white rounded"
-          >
-            {loading ? "Saving..." : "Add Product"}
-          </button>
-        </form>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white rounded"
+              >
+                {loading ? "Saving..." : "Add Product"}
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="text-center space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              ✅ Product Added Successfully!
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300">
+              Save this link to delete your product later:
+            </p>
+            <a
+              href={deleteLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="break-all text-primary-600 hover:underline"
+            >
+              {deleteLink}
+            </a>
+            <button
+              onClick={onClose}
+              className="mt-4 py-2 px-4 bg-primary-500 hover:bg-primary-600 text-white rounded"
+            >
+              Close
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

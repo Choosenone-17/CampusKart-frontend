@@ -20,24 +20,27 @@ export function Products({ onAddProductClick, onContactSeller }) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Always fetch ALL products
   const { data: products = [], isLoading } = useQuery({
-  queryKey: ["/api/products", selectedCategory],
-  queryFn: async () => {
-    const params = selectedCategory !== "all" ? `?category=${selectedCategory}` : "";
-    const res = await fetch(`/api/products${params}`);
-    if (!res.ok) throw new Error("Failed to fetch products");
-    return res.json();
-  },
-});
+    queryKey: ["products"],
+    queryFn: async () => {
+      const res = await fetch("/api/products");
+      if (!res.ok) throw new Error("Failed to fetch products");
+      return res.json();
+    },
+  });
 
-
+  // Frontend filtering
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = searchQuery === "" || 
+    const matchesSearch =
+      searchQuery === "" ||
       product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
-    
+
+    const matchesCategory =
+      selectedCategory === "all" ||
+      product.category?.toLowerCase() === selectedCategory.toLowerCase();
+
     return matchesSearch && matchesCategory;
   });
 
@@ -125,8 +128,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
                 <p className="text-gray-600 dark:text-gray-300 mb-6">
                   {searchQuery || selectedCategory !== "all" 
                     ? "Try adjusting your search or filters"
-                    : "Be the first to list an item in this category!"
-                  }
+                    : "Be the first to list an item in this category!"}
                 </p>
                 <Button
                   onClick={onAddProductClick}
@@ -142,12 +144,16 @@ export function Products({ onAddProductClick, onContactSeller }) {
             <>
               <div className="flex items-center justify-between mb-6">
                 <p className="text-gray-600 dark:text-gray-300">
-                  Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
-                  {selectedCategory !== "all" && ` in ${categories.find(c => c.value === selectedCategory)?.label}`}
+                  Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
+                  {selectedCategory !== "all" &&
+                    ` in ${categories.find((c) => c.value === selectedCategory)?.label}`}
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-testid="products-grid">
+              <div
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                data-testid="products-grid"
+              >
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product._id}

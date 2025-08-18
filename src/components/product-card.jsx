@@ -1,8 +1,18 @@
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/lib/cart";
 
-export function ProductCard({ product, inCart, onToggleCart, onContact, onDelete, currentUserId }) {
-  const isOwner = currentUserId && product.sellerId === currentUserId;
-  const imageSrc = product.image || product.imageUrl; // ✅ handles both
+export function ProductCard({ product, onContact, onDelete }) {
+  const { items, addItem, removeItem, isInCart } = useCart();
+  const inCart = isInCart(product._id);
+  const imageSrc = product.image || product.imageUrl;
+
+  const handleToggleCart = () => {
+    if (inCart) {
+      removeItem(product._id);
+    } else {
+      addItem(product);
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col">
@@ -36,7 +46,7 @@ export function ProductCard({ product, inCart, onToggleCart, onContact, onDelete
         <div className="flex gap-2">
           {/* Add / Remove toggle */}
           <Button
-            onClick={onToggleCart}
+            onClick={handleToggleCart}
             className={`${
               inCart
                 ? "bg-red-500 hover:bg-red-600"
@@ -54,8 +64,8 @@ export function ProductCard({ product, inCart, onToggleCart, onContact, onDelete
             Contact
           </Button>
 
-          {/* Delete product (only for owner) */}
-          {isOwner && (
+          {/* Delete product */}
+          {onDelete && (
             <Button
               onClick={() => onDelete(product._id)}
               className="bg-red-600 hover:bg-red-700 text-white"

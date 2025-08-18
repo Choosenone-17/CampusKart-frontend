@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
-import api from "@/lib/api"; // axios instance (configured with baseURL, etc.)
+import { fetchCart, addToCart, removeFromCart } from "@/lib/api";
 
 const CartContext = createContext(undefined);
 
@@ -7,26 +7,26 @@ export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Fetch cart from MongoDB (via backend API)
+  // 🔹 Fetch cart from backend using sessionId
   useEffect(() => {
-    const fetchCart = async () => {
+    const loadCart = async () => {
       try {
-        const res = await api.get("/api/cart");
-        setItems(res.data.items || []);
+        const data = await fetchCart();
+        setItems(data || []);
       } catch (error) {
         console.error("Failed to load cart:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchCart();
+    loadCart();
   }, []);
 
-  // 🔹 Add product to cart (MongoDB Atlas)
+  // 🔹 Add product to cart
   const addItem = async (product) => {
     try {
-      const res = await api.post("/api/cart", { productId: product._id });
-      setItems(res.data.items);
+      const data = await addToCart(product._id);
+      setItems(data || []);
     } catch (error) {
       console.error("Add to cart failed:", error);
     }
@@ -35,28 +35,15 @@ export function CartProvider({ children }) {
   // 🔹 Remove product from cart
   const removeItem = async (productId) => {
     try {
-      const res = await api.delete(`/api/cart/${productId}`);
-      setItems(res.data.items);
+      const data = await removeFromCart(productId);
+      setItems(data || []);
     } catch (error) {
       console.error("Remove from cart failed:", error);
     }
   };
 
-  // 🔹 Clear entire cart
-  const clearCart = async () => {
-    try {
-      const res = await api.delete("/api/cart");
-      setItems(res.data.items || []);
-    } catch (error) {
-      console.error("Clear cart failed:", error);
-    }
-  };
-
   // 🔹 Helpers
-  const total = items.reduce(
-    (sum, item) => sum + (Number(item.price) || 0),
-    0
-  );
+  const total = items.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
 
   const isInCart = (productId) => {
     return items.some((item) => String(item._id) === String(productId));
@@ -66,22 +53,17 @@ export function CartProvider({ children }) {
     items,
     addItem,
     removeItem,
-    clearCart,
     total,
     isInCart,
     loading,
   };
 
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export function useCart() {
   const context = useContext(CartContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useCart must be used within a CartProvider");
   }
   return context;

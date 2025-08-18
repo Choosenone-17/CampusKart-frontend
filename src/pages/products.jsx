@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/product-card.jsx";
 import { Search, Plus } from "lucide-react";
 import api from "@/lib/api";
-import { useCart } from "@/lib/cart";
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -21,8 +20,6 @@ const categories = [
 export function Products({ onAddProductClick, onContactSeller }) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-
-  const { addItem, removeItem, isInCart } = useCart();
   const queryClient = useQueryClient();
 
   // Fetch products
@@ -44,7 +41,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
     },
   });
 
-  // ✅ filter by search + category
+  // Filter products
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       searchQuery === "" ||
@@ -83,7 +80,6 @@ export function Products({ onAddProductClick, onContactSeller }) {
         {/* Search & Filters */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
@@ -93,8 +89,6 @@ export function Products({ onAddProductClick, onContactSeller }) {
                 className="pl-10"
               />
             </div>
-
-            {/* Category Filter */}
             <div className="lg:w-64">
               <select
                 value={selectedCategory}
@@ -164,21 +158,14 @@ export function Products({ onAddProductClick, onContactSeller }) {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => {
-                const inCart = isInCart(product._id);
-                return (
-                  <ProductCard
-                    key={product._id}
-                    product={product}
-                    inCart={inCart}
-                    onToggleCart={() =>
-                      inCart ? removeItem(product._id) : addItem(product)
-                    }
-                    onContact={onContactSeller}
-                    onDelete={(id) => deleteMutation.mutate(id)}
-                  />
-                );
-              })}
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  onContact={onContactSeller}
+                  onDelete={(id) => deleteMutation.mutate(id)}
+                />
+              ))}
             </div>
           </>
         )}

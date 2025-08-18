@@ -3,9 +3,9 @@ import { useCart } from "@/lib/cart";
 
 export function ProductCard({ product = {}, onContact, onDelete }) {
   const { addItem, removeItem, isInCart } = useCart();
-  const inCart = product._id ? isInCart(product._id) : false;
+  const inCart = product?._id ? isInCart(product._id) : false;
 
-  // ✅ Handle both array of strings and array of objects
+  // ✅ Handle both array of strings and array of objects for images
   let imageSrc = null;
   if (Array.isArray(product.images) && product.images.length > 0) {
     imageSrc =
@@ -17,7 +17,7 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
   }
 
   const handleToggleCart = () => {
-    if (!product._id) return;
+    if (!product?._id) return;
     if (inCart) {
       removeItem(product._id);
     } else {
@@ -32,11 +32,10 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
         {imageSrc ? (
           <img
             src={imageSrc}
-            alt={product.title || "Product Image"}
+            alt={product?.title || "Product Image"}
             className="w-full h-full object-cover"
             onError={(e) => {
-              // fallback if image is broken
-              e.target.src = "/placeholder.png"; // 👉 put a default image in /public folder
+              e.currentTarget.src = "/placeholder.png";
             }}
           />
         ) : (
@@ -49,22 +48,45 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
       </div>
 
       {/* Product Info */}
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-        {product.title || "Untitled Product"}
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+        {product?.title || "Untitled Product"}
       </h3>
-      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-        {product.description || "No description available."}
+
+      <p className="text-gray-600 dark:text-gray-300 text-sm mb-2 line-clamp-2">
+        {product?.description || "No description available."}
       </p>
+
+      {/* Category + Condition badges */}
+      <div className="flex flex-wrap gap-2 mb-2">
+        {product?.category && (
+          <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+            {product.category}
+          </span>
+        )}
+        {product?.condition && (
+          <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+            {product.condition}
+          </span>
+        )}
+      </div>
+
+      {/* Seller Info */}
+      {product?.sellerName && (
+        <p className="text-sm text-gray-500 mb-3">
+          Sold by <span className="font-medium">{product.sellerName}</span>
+        </p>
+      )}
 
       <div className="mt-auto flex items-center justify-between">
         <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
-          ₹{typeof product.price === "number" ? product.price : "0"}
+          ₹{typeof product?.price === "number" ? product.price : "0"}
         </span>
+
         <div className="flex gap-2">
           {/* Add / Remove toggle */}
           <Button
             onClick={handleToggleCart}
-            disabled={!product._id}
+            disabled={!product?._id}
             className={`${
               inCart
                 ? "bg-red-500 hover:bg-red-600"
@@ -83,7 +105,7 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
           </Button>
 
           {/* Delete product */}
-          {onDelete && product._id && (
+          {onDelete && product?._id && (
             <Button
               onClick={() => onDelete(product._id)}
               className="bg-red-600 hover:bg-red-700 text-white"

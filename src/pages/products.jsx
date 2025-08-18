@@ -32,7 +32,11 @@ export function Products({ onAddProductClick, onContactSeller }) {
     },
   });
 
-  const products = Array.isArray(productsData) ? productsData : [];
+  // Normalize images so ProductCard always gets a single string
+  const products = (productsData || []).map((p) => ({
+    ...p,
+    image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : null,
+  }));
 
   // Delete product mutation
   const deleteMutation = useMutation({

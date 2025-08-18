@@ -5,7 +5,6 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
   const { addItem, removeItem, isInCart } = useCart();
   const inCart = product?._id ? isInCart(product._id) : false;
 
-  // ✅ Handle both array of strings and array of objects for images
   let imageSrc = null;
   if (Array.isArray(product.images) && product.images.length > 0) {
     imageSrc =
@@ -26,14 +25,18 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col">
+    <div
+      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 
+                 dark:border-gray-700 p-4 flex flex-col 
+                 transform transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-xl"
+    >
       {/* Product Image */}
       <div className="h-48 w-full bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
         {imageSrc ? (
           <img
             src={imageSrc}
             alt={product?.title || "Product Image"}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transform transition-transform duration-500 hover:scale-110"
             onError={(e) => {
               e.currentTarget.src = "/placeholder.png";
             }}
@@ -110,7 +113,7 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
               onClick={() => onDelete(product._id)}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              Delete
+              Remove Product
             </Button>
           )}
         </div>

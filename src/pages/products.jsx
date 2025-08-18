@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/product-card.jsx";
 import { Search, Plus } from "lucide-react";
 import api from "@/lib/api";
 
+// Static categories
 const categories = [
   { value: "all", label: "All Categories" },
   { value: "textbooks", label: "Textbooks" },
@@ -23,7 +24,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
   const queryClient = useQueryClient();
 
   // Fetch products
-  const { data: productsData, isLoading } = useQuery({
+  const { data: productsData = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
       const res = await api.get("/api/products");
@@ -43,12 +44,12 @@ export function Products({ onAddProductClick, onContactSeller }) {
     },
   });
 
-  // Filter products safely
+  // Apply filters
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
-      searchQuery === "" ||
-      (product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchQuery.toLowerCase()));
+      !searchQuery ||
+      product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesCategory =
       selectedCategory === "all" ||
@@ -109,6 +110,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
 
         {/* Results */}
         {isLoading ? (
+          // Loading skeleton
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(12)].map((_, i) => (
               <div
@@ -124,6 +126,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
+          // Empty state
           <div className="text-center py-16">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-12 max-w-md mx-auto shadow-lg">
               <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-6">

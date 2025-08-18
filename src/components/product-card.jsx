@@ -18,7 +18,9 @@ const categories = [
 ];
 
 /* ✅ Product Card Component */
-export function ProductCard({ product, inCart, onToggleCart, onContact }) {
+export function ProductCard({ product, inCart, onToggleCart, onContact, onDelete, currentUserId }) {
+  const isOwner = currentUserId && product.sellerId === currentUserId;
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col">
       {/* Product Image */}
@@ -49,6 +51,7 @@ export function ProductCard({ product, inCart, onToggleCart, onContact }) {
           ₹{product.price}
         </span>
         <div className="flex gap-2">
+          {/* Add / Remove toggle */}
           <Button
             onClick={onToggleCart}
             className={`${
@@ -59,12 +62,24 @@ export function ProductCard({ product, inCart, onToggleCart, onContact }) {
           >
             {inCart ? "Remove" : "Add"}
           </Button>
+
+          {/* Contact seller */}
           <Button
             onClick={() => onContact(product)}
             className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
           >
             Contact
           </Button>
+
+          {/* Delete product (only for owner) */}
+          {isOwner && (
+            <Button
+              onClick={() => onDelete(product._id)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -72,7 +87,7 @@ export function ProductCard({ product, inCart, onToggleCart, onContact }) {
 }
 
 /* ✅ Products Grid Component */
-export function Products({ onAddProductClick, onContactSeller }) {
+export function Products({ onAddProductClick, onContactSeller, onDeleteProduct, currentUserId }) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -164,6 +179,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
         {/* Results */}
         <div>
           {isLoading ? (
+            // Skeleton loaders
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(12)].map((_, i) => (
                 <div
@@ -179,6 +195,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
+            // No results UI
             <div className="text-center py-16">
               <div className="bg-white dark:bg-gray-800 rounded-xl p-12 max-w-md mx-auto shadow-lg">
                 <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -231,6 +248,8 @@ export function Products({ onAddProductClick, onContactSeller }) {
                         inCart ? removeItem(product._id) : addItem(product)
                       }
                       onContact={onContactSeller}
+                      onDelete={onDeleteProduct}
+                      currentUserId={currentUserId}
                     />
                   );
                 })}

@@ -23,13 +23,15 @@ export function Products({ onAddProductClick, onContactSeller }) {
   const queryClient = useQueryClient();
 
   // Fetch products
-  const { data: products = [], isLoading } = useQuery({
+  const { data: productsData, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
       const res = await api.get("/api/products");
-      return res.data;
+      return Array.isArray(res.data) ? res.data : [];
     },
   });
+
+  const products = Array.isArray(productsData) ? productsData : [];
 
   // Delete product mutation
   const deleteMutation = useMutation({
@@ -41,12 +43,12 @@ export function Products({ onAddProductClick, onContactSeller }) {
     },
   });
 
-  // Filter products
+  // Filter products safely
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       searchQuery === "" ||
-      product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      (product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesCategory =
       selectedCategory === "all" ||

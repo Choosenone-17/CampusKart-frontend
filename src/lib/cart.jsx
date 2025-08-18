@@ -12,7 +12,7 @@ export function CartProvider({ children }) {
     const loadCart = async () => {
       try {
         const data = await fetchCart();
-        setItems(data || []);
+        setItems(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Failed to load cart:", error);
       } finally {
@@ -26,7 +26,7 @@ export function CartProvider({ children }) {
   const addItem = async (product) => {
     try {
       const data = await addToCart(product._id);
-      setItems(data || []);
+      setItems(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Add to cart failed:", error);
     }
@@ -36,17 +36,19 @@ export function CartProvider({ children }) {
   const removeItem = async (productId) => {
     try {
       const data = await removeFromCart(productId);
-      setItems(data || []);
+      setItems(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Remove from cart failed:", error);
     }
   };
 
   // 🔹 Helpers
-  const total = items.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+  const total = Array.isArray(items)
+    ? items.reduce((sum, item) => sum + (Number(item.price) || 0), 0)
+    : 0;
 
   const isInCart = (productId) => {
-    return items.some((item) => String(item._id) === String(productId));
+    return Array.isArray(items) && items.some((item) => String(item._id) === String(productId));
   };
 
   const value = {

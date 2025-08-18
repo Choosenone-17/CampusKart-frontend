@@ -1,200 +1,244 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { User } from "lucide-react";
-import { useCart } from "@/lib/cart";
 import { Input } from "@/components/ui/input";
+import { Search, Plus } from "lucide-react";
+import api from "@/lib/api";
+import { useCart } from "@/lib/cart";
 
-const categoryColors = {
-  textbooks: "text-primary-500 bg-primary-50 dark:bg-primary-900",
-  electronics: "text-green-500 bg-green-50 dark:bg-green-900",
-  "dorm-items": "text-purple-500 bg-purple-50 dark:bg-purple-900",
-  supplies: "text-amber-500 bg-amber-50 dark:bg-amber-900",
-  clothing: "text-pink-500 bg-pink-50 dark:bg-pink-900",
-  furniture: "text-indigo-500 bg-indigo-50 dark:bg-indigo-900",
-  other: "text-gray-500 bg-gray-50 dark:bg-gray-900",
-};
+const categories = [
+  { value: "all", label: "All Categories" },
+  { value: "textbooks", label: "Textbooks" },
+  { value: "electronics", label: "Electronics" },
+  { value: "dorm-items", label: "Dorm Items" },
+  { value: "supplies", label: "Supplies" },
+  { value: "clothing", label: "Clothing" },
+  { value: "furniture", label: "Furniture" },
+  { value: "other", label: "Other" },
+];
 
-const conditionColors = {
-  new: "text-green-600 bg-green-100 dark:bg-green-900",
-  "like-new": "text-blue-600 bg-blue-100 dark:bg-blue-900",
-  good: "text-yellow-600 bg-yellow-100 dark:bg-yellow-900",
-  fair: "text-orange-600 bg-orange-100 dark:bg-orange-900",
-  poor: "text-red-600 bg-red-100 dark:bg-red-900",
-};
-
-const formatLabel = (str = "") =>
-  str.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase());
-
-export function ProductCard({ product, onContact, onDeleted }) {
-  const { addItem, removeItem, items } = useCart();
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteKey, setDeleteKey] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  // ✅ Always ensure we use "_id" consistently
-  const productId = String(product._id);
-
-  // ✅ Check cart by product._id only
-  const isInCart = items.some((item) => String(item._id) === productId);
-
-  const handleCartToggle = () => {
-    if (isInCart) {
-      removeItem(productId); // remove by _id
-    } else {
-      addItem({ ...product, _id: productId }); // add with consistent _id
-    }
-  };
-
-  const handleDelete = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/products/${productId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deleteKey }),
-      });
-
-      if (res.status === 204) {
-        if (onDeleted) onDeleted(productId);
-        setShowDeleteModal(false);
-        setDeleteKey("");
-      } else {
-        const data = await res.json();
-        setError(data.message || "Failed to delete product");
-      }
-    } catch (err) {
-      setError("Network error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+/* ✅ Product Card Component */
+export function ProductCard({ product, inCart, onToggleCart, onContact }) {
   return (
-    <div
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-      data-testid={`product-card-${productId}`}
-    >
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col">
       {/* Product Image */}
-      <div className="aspect-video bg-gray-100 dark:bg-gray-700 overflow-hidden">
-        {product.images?.length > 0 ? (
+      <div className="h-48 w-full bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 overflow-hidden">
+        {product.imageUrl ? (
           <img
-            src={product.images[0]}
+            src={product.imageUrl}
             alt={product.title}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
-            <User className="h-12 w-12" />
+            No Image
           </div>
         )}
       </div>
 
-      {/* Product Details */}
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 flex-1">
-            {product.title}
-          </h3>
-          <span className="text-xl font-bold text-primary-500 flex-shrink-0">
-            ₹{product.price}
-          </span>
-        </div>
+      {/* Product Info */}
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        {product.title}
+      </h3>
+      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+        {product.description}
+      </p>
 
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-2">
-          {product.description}
-        </p>
-
-        {/* Category and Condition Badges */}
-        <div className="flex gap-2 mb-4 flex-wrap">
-          <Badge
-            className={`text-xs font-medium px-2 py-1 rounded-full ${
-              categoryColors[product.category] || categoryColors.other
-            }`}
-          >
-            {formatLabel(product.category)}
-          </Badge>
-          <Badge
-            className={`text-xs font-medium px-2 py-1 rounded-full ${
-              conditionColors[product.condition] || conditionColors.good
-            }`}
-          >
-            {formatLabel(product.condition)}
-          </Badge>
-        </div>
-
-        {/* Seller Info */}
-        <div className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-          <span>Sold by {product.sellerName}</span>
-        </div>
-
-        {/* Action Buttons */}
+      <div className="mt-auto flex items-center justify-between">
+        <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
+          ₹{product.price}
+        </span>
         <div className="flex gap-2">
           <Button
+            onClick={onToggleCart}
+            className={`${
+              inCart
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-primary-500 hover:bg-primary-600"
+            } text-white`}
+          >
+            {inCart ? "Remove" : "Add"}
+          </Button>
+          <Button
             onClick={() => onContact(product)}
-            className="flex-1 bg-primary-500 hover:bg-primary-600 text-white text-sm transition-colors duration-200"
+            className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
           >
-            Contact Seller
-          </Button>
-          <Button
-            onClick={handleCartToggle}
-            variant={isInCart ? "secondary" : "outline"}
-            className="px-3 text-sm transition-colors duration-200"
-          >
-            {isInCart ? "Remove" : "Add to Cart"}
-          </Button>
-          <Button
-            onClick={() => setShowDeleteModal(true)}
-            variant="destructive"
-            className="px-3 text-sm"
-          >
-            Delete
+            Contact
           </Button>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-sm">
-            <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-              Delete Product
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-              Enter the delete key you received when posting this product.
-            </p>
-            <Input
-              type="password"
-              placeholder="Enter delete key"
-              value={deleteKey}
-              onChange={(e) => setDeleteKey(e.target.value)}
-              className="mb-3"
-            />
-            {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-            <div className="flex gap-2">
-              <Button
-                onClick={handleDelete}
-                disabled={loading}
-                className="bg-red-600 hover:bg-red-700 text-white flex-1"
+/* ✅ Products Grid Component */
+export function Products({ onAddProductClick, onContactSeller }) {
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // ✅ Grab cart helpers
+  const { addItem, removeItem, isInCart } = useCart();
+
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const res = await api.get("/api/products");
+      return res.data;
+    },
+  });
+
+  // ✅ Filtering
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      searchQuery === "" ||
+      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === "all" ||
+      product.category?.toLowerCase() === selectedCategory.toLowerCase();
+
+    return matchesSearch && matchesCategory;
+  });
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Browse Products
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">
+                Discover great deals from your campus community
+              </p>
+            </div>
+            <Button
+              onClick={onAddProductClick}
+              className="bg-primary-500 hover:bg-primary-600 text-white transition-colors duration-200"
+              data-testid="button-add-product"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Product
+            </Button>
+          </div>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Search */}
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                  data-testid="input-search"
+                />
+              </div>
+            </div>
+
+            {/* Category Filter */}
+            <div className="lg:w-64">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                data-testid="select-category"
               >
-                {loading ? "Deleting..." : "Delete"}
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setDeleteKey("");
-                  setError("");
-                }}
-                variant="outline"
-              >
-                Cancel
-              </Button>
+                {categories.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Results */}
+        <div>
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(12)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white dark:bg-gray-800 rounded-lg p-4 animate-pulse"
+                >
+                  <div className="bg-gray-200 dark:bg-gray-700 h-48 rounded-lg mb-4"></div>
+                  <div className="space-y-2">
+                    <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded"></div>
+                    <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded w-3/4"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-12 max-w-md mx-auto shadow-lg">
+                <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Search className="h-8 w-8 text-primary-500" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  No products found
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  {searchQuery || selectedCategory !== "all"
+                    ? "Try adjusting your search or filters"
+                    : "Be the first to list an item in this category!"}
+                </p>
+                <Button
+                  onClick={onAddProductClick}
+                  className="bg-primary-500 hover:bg-primary-600 text-white"
+                  data-testid="button-no-results"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Product
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <p className="text-gray-600 dark:text-gray-300">
+                  Showing {filteredProducts.length} product
+                  {filteredProducts.length !== 1 ? "s" : ""}
+                  {selectedCategory !== "all" &&
+                    ` in ${
+                      categories.find((c) => c.value === selectedCategory)
+                        ?.label
+                    }`}
+                </p>
+              </div>
+
+              <div
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                data-testid="products-grid"
+              >
+                {filteredProducts.map((product) => {
+                  const inCart = isInCart(product._id);
+                  return (
+                    <ProductCard
+                      key={product._id}
+                      product={product}
+                      inCart={inCart}
+                      onToggleCart={() =>
+                        inCart ? removeItem(product._id) : addItem(product)
+                      }
+                      onContact={onContactSeller}
+                    />
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

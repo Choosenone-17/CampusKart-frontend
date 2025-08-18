@@ -5,7 +5,6 @@ const CartContext = createContext(undefined);
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
 
-
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
@@ -21,25 +20,38 @@ export function CartProvider({ children }) {
     localStorage.setItem("cart", JSON.stringify(items));
   }, [items]);
 
+  // ✅ Always normalize IDs to strings
+  const normalizeId = (id) => String(id);
+
   const addItem = (product) => {
+    const productId = normalizeId(product._id);
     setItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item._id === product._id);
-      if (existingItem) {
-        return prevItems; 
-      }
-      return [...prevItems, product];
+      const exists = prevItems.some((item) => normalizeId(item._id) === productId);
+      if (exists) return prevItems;
+      return [...prevItems, { ...product, _id: productId }];
     });
   };
 
   const removeItem = (productId) => {
-    setItems((prevItems) => prevItems.filter((item) => item._id !== productId));
+    const normalized = normalizeId(productId);
+    setItems((prevItems) =>
+      prevItems.filter((item) => normalizeId(item._id) !== normalized)
+    );
   };
 
   const clearCart = () => {
     setItems([]);
   };
 
-  const total = items.reduce((sum, item) => sum + (item.price || 0), 0);
+  const total = items.reduce(
+    (sum, item) => sum + (Number(item.price) || 0),
+    0
+  );
+
+  const isInCart = (productId) => {
+    const normalized = normalizeId(productId);
+    return items.some((item) => normalizeId(item._id) === normalized);
+  };
 
   const value = {
     items,
@@ -47,6 +59,7 @@ export function CartProvider({ children }) {
     removeItem,
     clearCart,
     total,
+    isInCart,
   };
 
   return (

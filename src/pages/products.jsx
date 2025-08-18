@@ -6,7 +6,6 @@ import { ProductCard } from "@/components/product-card.jsx";
 import { Search, Plus } from "lucide-react";
 import api from "@/lib/api";
 
-
 const categories = [
   { value: "all", label: "All Categories" },
   { value: "textbooks", label: "Textbooks" },
@@ -21,8 +20,8 @@ const categories = [
 export function Products({ onAddProductClick, onContactSeller }) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [cart, setCart] = useState([]); // ✅ cart state 
 
-  // ✅ Use axios instance (api.js) instead of fetch
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
@@ -31,7 +30,16 @@ export function Products({ onAddProductClick, onContactSeller }) {
     },
   });
 
-  // Frontend filtering
+  // Toggle cart (add/remove product)
+  const toggleCart = (productId) => {
+    setCart((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId) // remove
+        : [...prev, productId] // add
+    );
+  };
+
+  // Filtering
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       searchQuery === "" ||
@@ -160,6 +168,8 @@ export function Products({ onAddProductClick, onContactSeller }) {
                   <ProductCard
                     key={product._id}
                     product={product}
+                    inCart={cart.includes(product._id)} 
+                    onToggleCart={() => toggleCart(product._id)} 
                     onContact={onContactSeller}
                   />
                 ))}

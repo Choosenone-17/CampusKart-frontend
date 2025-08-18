@@ -23,7 +23,6 @@ const conditionColors = {
   poor: "text-red-600 bg-red-100 dark:bg-red-900",
 };
 
-// Helper: format string to Title Case
 const formatLabel = (str = "") =>
   str.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase());
 
@@ -34,14 +33,17 @@ export function ProductCard({ product, onContact, onDeleted }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ✅ Always ensure we use "_id" consistently
   const productId = String(product._id);
+
+  // ✅ Check cart by product._id only
   const isInCart = items.some((item) => String(item._id) === productId);
 
   const handleCartToggle = () => {
     if (isInCart) {
-      removeItem(productId);
+      removeItem(productId); // remove by _id
     } else {
-      addItem({ ...product, _id: productId });
+      addItem({ ...product, _id: productId }); // add with consistent _id
     }
   };
 

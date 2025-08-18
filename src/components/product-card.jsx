@@ -22,7 +22,7 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
         {imageSrc ? (
           <img
             src={imageSrc}
-            alt={product.title || "Product Image"}
+            alt={product.image || "Product Image"}
             className="w-full h-full object-cover"
           />
         ) : (

@@ -16,12 +16,12 @@ export default function AddProductModal({ isOpen, onClose, onProductAdded }) {
     contactMethod: "email",
     contactDetails: "",
     images: [],
-    deleteKey: uuidv4(),   // ✅ use correct case
+    deleteKey: uuidv4(),  
     createdAt: new Date()
   });
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [deleteLink, setDeleteLink] = useState(null); // ✅ store delete link
+  const [deleteLink, setDeleteLink] = useState(null); 
 
   if (!isOpen) return null; 
 

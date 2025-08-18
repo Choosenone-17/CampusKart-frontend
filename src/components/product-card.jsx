@@ -2,9 +2,19 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
 
 export function ProductCard({ product = {}, onContact, onDelete }) {
-  const { items, addItem, removeItem, isInCart } = useCart();
+  const { addItem, removeItem, isInCart } = useCart();
   const inCart = product._id ? isInCart(product._id) : false;
-  const imageSrc = product.image || product.imageUrl || null;
+
+  // ✅ Handle both array of strings and array of objects
+  let imageSrc = null;
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    imageSrc =
+      typeof product.images[0] === "string"
+        ? product.images[0]
+        : product.images[0]?.url || null;
+  } else {
+    imageSrc = product.image || product.imageUrl || null;
+  }
 
   const handleToggleCart = () => {
     if (!product._id) return;
@@ -18,17 +28,23 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col">
       {/* Product Image */}
-      <div className="h-48 w-full bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 overflow-hidden">
+      <div className="h-48 w-full bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
         {imageSrc ? (
           <img
             src={imageSrc}
-            alt={product.image || "Product Image"}
+            alt={product.title || "Product Image"}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              // fallback if image is broken
+              e.target.src = "/placeholder.png"; // 👉 put a default image in /public folder
+            }}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            No Image
-          </div>
+          <img
+            src="/placeholder.png"
+            alt="No Image"
+            className="w-full h-full object-cover opacity-70"
+          />
         )}
       </div>
 

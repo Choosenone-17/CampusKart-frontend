@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/product-card.jsx";
@@ -23,12 +23,24 @@ export function Products({ onAddProductClick, onContactSeller }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { addItem, removeItem, isInCart } = useCart();
+  const queryClient = useQueryClient();
 
+  // Fetch products
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
       const res = await api.get("/api/products");
       return res.data;
+    },
+  });
+
+  // Delete product mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      await api.delete(`/api/products/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["products"]);
     },
   });
 
@@ -163,6 +175,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
                       inCart ? removeItem(product._id) : addItem(product)
                     }
                     onContact={onContactSeller}
+                    onDelete={(id) => deleteMutation.mutate(id)}
                   />
                 );
               })}

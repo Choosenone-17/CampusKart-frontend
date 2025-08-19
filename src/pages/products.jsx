@@ -34,9 +34,11 @@ export function Products({ onAddProductClick, onContactSeller }) {
 
   // Delete product mutation
   const deleteMutation = useMutation({
-    mutationFn: async ({ id, deleteKey }) => {
-      const queryParam = deleteKey ? `?key=${deleteKey}` : "";
-      await api.delete(`/api/products/${id}${queryParam}`);
+    mutationFn: async ({ id, removalKey }) => {
+      if (!removalKey) throw new Error("Delete key is required");
+      await api.delete(`/api/products/${id}`, {
+        data: { deleteKey: removalKey },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["products"]);
@@ -167,8 +169,8 @@ export function Products({ onAddProductClick, onContactSeller }) {
                   key={product._id}
                   product={product}
                   onContact={onContactSeller}
-                  onDelete={(id) =>
-                    deleteMutation.mutate({ id, deleteKey: product.deleteKey })
+                  onDelete={(id, removalKey) =>
+                    deleteMutation.mutate({ id, removalKey })
                   }
                 />
               ))}

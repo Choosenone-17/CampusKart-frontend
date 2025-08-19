@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
+import axios from "axios";
 
 export function ProductCard({ product = {}, onContact, onDelete }) {
   const { addItem, removeItem, isInCart } = useCart();
@@ -24,13 +25,24 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
     }
   };
 
-  const handleDelete = () => {
-    if (!product.removalKey) {
-      alert("No removal key found for this product.");
-      return;
-    }
-    if (window.confirm(`Delete "${product?.title}"?`)) {
-      onDelete?.(product._id, product.removalKey);
+  // 🔹 Ask user for delete key when they want to remove a product
+  const handleDelete = async () => {
+    if (!product?._id) return;
+
+    const deleteKey = prompt(
+      `Enter the deletion key to remove "${product?.title}":`
+    );
+    if (!deleteKey) return;
+
+    try {
+      await axios.delete(`/api/products/${product._id}`, {
+        data: { deleteKey },
+      });
+      alert("✅ Product removed successfully.");
+      onDelete?.(product._id);
+    } catch (err) {
+      console.error("Failed to remove product:", err);
+      alert("❌ Incorrect key or failed to remove product.");
     }
   };
 
@@ -116,7 +128,9 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
           >
             Contact
           </Button>
-          {onDelete && product?._id && product.removalKey && (
+
+          {/* Remove Product (always shown, requires deleteKey prompt) */}
+          {product?._id && (
             <Button
               onClick={handleDelete}
               className="bg-red-600 hover:bg-red-700 text-white"

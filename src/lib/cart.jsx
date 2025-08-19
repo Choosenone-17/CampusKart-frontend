@@ -7,12 +7,11 @@ export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Fetch cart from backend using sessionId
   useEffect(() => {
     const loadCart = async () => {
       try {
         const data = await fetchCart();
-        setItems(Array.isArray(data) ? data : []);
+        setItems(Array.isArray(data?.products) ? data.products : []);
       } catch (error) {
         console.error("Failed to load cart:", error);
       } finally {
@@ -26,7 +25,7 @@ export function CartProvider({ children }) {
   const addItem = async (product) => {
     try {
       const data = await addToCart(product._id);
-      setItems(Array.isArray(data) ? data : []);
+      setItems(Array.isArray(data?.products) ? data.products : []);
     } catch (error) {
       console.error("Add to cart failed:", error);
     }
@@ -36,7 +35,7 @@ export function CartProvider({ children }) {
   const removeItem = async (productId) => {
     try {
       const data = await removeFromCart(productId);
-      setItems(Array.isArray(data) ? data : []);
+      setItems(Array.isArray(data?.products) ? data.products : []);
     } catch (error) {
       console.error("Remove from cart failed:", error);
     }
@@ -44,11 +43,17 @@ export function CartProvider({ children }) {
 
   // 🔹 Helpers
   const total = Array.isArray(items)
-    ? items.reduce((sum, item) => sum + (Number(item.price) || 0), 0)
+    ? items.reduce((sum, item) => {
+        const price = item.productId?.price ?? item.price ?? 0;
+        return sum + Number(price);
+      }, 0)
     : 0;
 
   const isInCart = (productId) => {
-    return Array.isArray(items) && items.some((item) => String(item._id) === String(productId));
+    return (
+      Array.isArray(items) &&
+      items.some((item) => String(item.productId?._id || item._id) === String(productId))
+    );
   };
 
   const value = {

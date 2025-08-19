@@ -24,6 +24,16 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
     }
   };
 
+  const handleDelete = () => {
+    if (!product.removalKey) {
+      alert("No removal key found for this product.");
+      return;
+    }
+    if (window.confirm(`Delete "${product?.title}"?`)) {
+      onDelete?.(product._id, product.removalKey);
+    }
+  };
+
   return (
     <div
       className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 
@@ -106,11 +116,9 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
           >
             Contact
           </Button>
-
-          {/* Delete product */}
-          {onDelete && product?._id && (
+          {onDelete && product?._id && product.removalKey && (
             <Button
-              onClick={() => onDelete(product._id)}
+              onClick={handleDelete}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               Remove Product

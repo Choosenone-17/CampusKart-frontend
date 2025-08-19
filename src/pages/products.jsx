@@ -24,7 +24,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
   const queryClient = useQueryClient();
 
   // Fetch products
-  const { data: productsData = [], isLoading } = useQuery({
+  const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
       const res = await api.get("/api/products");
@@ -32,16 +32,11 @@ export function Products({ onAddProductClick, onContactSeller }) {
     },
   });
 
-  // Normalize images so ProductCard always gets a single string
-  const products = (productsData || []).map((p) => ({
-    ...p,
-    image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : null,
-  }));
-
   // Delete product mutation
   const deleteMutation = useMutation({
     mutationFn: async ({ id, deleteKey }) => {
-      await api.delete(`/api/products/${id}?key=${deleteKey}`);
+      const queryParam = deleteKey ? `?key=${deleteKey}` : "";
+      await api.delete(`/api/products/${id}${queryParam}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["products"]);

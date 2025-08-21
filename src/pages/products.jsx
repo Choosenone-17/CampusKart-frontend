@@ -33,7 +33,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
     },
   });
 
-  // ✅ Mark as Sold mutation
+  // Mark as Sold mutation
   const markAsSoldMutation = useMutation({
     mutationFn: async ({ id, secretKey }) => {
       await api.post(`/api/products/${id}/mark-sold`, { secretKey });
@@ -43,14 +43,17 @@ export function Products({ onAddProductClick, onContactSeller }) {
     },
   });
 
+  // Add product mutation
   const addProductMutation = useMutation({
     mutationFn: async (newProductData) => {
       const res = await api.post("/api/products", newProductData);
-      return res.data;
+      return res.data; // { ...product fields, secretKey }
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(["products"], (old = []) => [data.product, ...old]);
+      // Prepend new product to query cache
+      queryClient.setQueryData(["products"], (old = []) => [data, ...old]);
 
+      // Show SweetAlert with secret key
       Swal.fire({
         icon: "success",
         title: "✅ Product Added Successfully!",
@@ -135,7 +138,6 @@ export function Products({ onAddProductClick, onContactSeller }) {
 
         {/* Results */}
         {isLoading ? (
-          // Loading skeleton
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(12)].map((_, i) => (
               <div
@@ -151,7 +153,6 @@ export function Products({ onAddProductClick, onContactSeller }) {
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
-          // Empty state
           <div className="text-center py-16">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-12 max-w-md mx-auto shadow-lg">
               <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-6">

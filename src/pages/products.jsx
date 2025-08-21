@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/product-card.jsx";
 import { Search, Plus } from "lucide-react";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 // Static categories
@@ -42,6 +43,26 @@ export function Products({ onAddProductClick, onContactSeller }) {
     },
   });
 
+  const addProductMutation = useMutation({
+    mutationFn: async (newProductData) => {
+      const res = await api.post("/api/products", newProductData);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(["products"], (old = []) => [data.product, ...old]);
+
+      Swal.fire({
+        icon: "success",
+        title: "✅ Product Added Successfully!",
+        html: `
+          <p>Use this key to mark your product as sold when it gets sold out 😊</p>
+          <strong style="font-size:18px;color:#333;">${data.secretKey}</strong>
+        `,
+        confirmButtonText: "Got it!",
+      });
+    },
+  });
+
   // Apply filters
   let filteredProducts = products.filter((product) => {
     const matchesSearch =
@@ -56,7 +77,6 @@ export function Products({ onAddProductClick, onContactSeller }) {
     return matchesSearch && matchesCategory;
   });
 
-  // ✅ Sort available first, sold last
   filteredProducts.sort((a, b) => {
     if (a.status === "sold" && b.status !== "sold") return 1;
     if (a.status !== "sold" && b.status === "sold") return -1;
@@ -170,7 +190,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredProducts.map((product) => (
                 <ProductCard
-                  key={product.id || product._id} // ✅ safe key
+                  key={product.id || product._id}
                   product={product}
                   onContact={onContactSeller}
                   onMarkSold={(id, secretKey) =>

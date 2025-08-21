@@ -47,11 +47,14 @@ export function Products({ onAddProductClick, onContactSeller }) {
   const addProductMutation = useMutation({
     mutationFn: async (newProductData) => {
       const res = await api.post("/api/products", newProductData);
-      return res.data; // { ...product fields, secretKey }
+      return res.data; // { product: {...}, secretKey }
     },
     onSuccess: (data) => {
       // Prepend new product to query cache
-      queryClient.setQueryData(["products"], (old = []) => [data, ...old]);
+      queryClient.setQueryData(["products"], (old = []) => [
+        data.product,
+        ...old,
+      ]);
 
       // Show SweetAlert with secret key
       Swal.fire({

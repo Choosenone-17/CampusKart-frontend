@@ -50,7 +50,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
       return res.data; // { product: {...}, secretKey }
     },
     onSuccess: (data) => {
-      // Prepend new product to query cache
+      // ⚡ Important: add only the product to the cache
       queryClient.setQueryData(["products"], (old = []) => [
         data.product,
         ...old,

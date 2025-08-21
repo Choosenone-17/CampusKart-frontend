@@ -2,9 +2,13 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
 import axios from "axios";
 
-export function ProductCard({ product = {}, onContact, onDelete }) {
+export function ProductCard({ product = {}, onContact, onMarkSold }) {
   const { addItem, removeItem, isInCart } = useCart();
-  const inCart = product?._id ? isInCart(product._id) : false;
+
+  // ✅ Safe productId (supports both id and _id from backend)
+  const productId = product?.id || product?._id;
+  const inCart = productId ? isInCart(productId) : false;
+  const isSold = product?.status === "sold";
 
   let imageSrc = null;
   if (Array.isArray(product.images) && product.images.length > 0) {
@@ -17,43 +21,50 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
   }
 
   const handleToggleCart = () => {
-    if (!product?._id) return;
+    if (!productId || isSold) return;
     if (inCart) {
-      removeItem(product._id);
+      removeItem(productId);
     } else {
-      addItem(product);
+      addItem({ ...product, id: productId }); // ✅ Ensure cart stores consistent id
     }
   };
 
-  // 🔹 Ask user for delete key when they want to remove a product
-  const handleDelete = async () => {
-    if (!product?._id) return;
+  // 🔹 Mark product as sold
+  const handleMarkSold = async () => {
+    if (!productId) return;
 
-    const deleteKey = prompt(
-      `Enter the deletion key to remove "${product?.title}":`
+    const secretKey = prompt(
+      `Enter your secret key to mark "${product?.title}" as SOLD:`
     );
-    if (!deleteKey) return;
+    if (!secretKey) return;
 
     try {
-      await axios.delete(`/api/products/${product._id}`, {
-        data: { deleteKey },
+      const res = await axios.post(`/api/products/${productId}/mark-sold`, {
+        secretKey,
       });
-      alert("✅ Product removed successfully.");
-      onDelete?.(product._id);
+      alert(res.data.message || "✅ Product marked as sold");
+      onMarkSold?.(productId);
     } catch (err) {
-      console.error("Failed to remove product:", err);
-      alert("❌ Incorrect key or failed to remove product.");
+      if (
+        err.response?.status === 403 ||
+        err.response?.data?.message === "Invalid secret key"
+      ) {
+        alert("❌ Wrong secret key. Please try again.");
+      } else {
+        alert("❌ Failed to mark as sold. Try again later.");
+      }
     }
   };
 
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 
                  dark:border-gray-700 p-4 flex flex-col 
-                 transform transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-xl"
+                 transform transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-xl
+                 ${isSold ? "opacity-70" : ""}`}
     >
       {/* Product Image */}
-      <div className="h-48 w-full bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
+      <div className="h-48 w-full bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 overflow-hidden flex items-center justify-center relative">
         {imageSrc ? (
           <img
             src={imageSrc}
@@ -69,6 +80,15 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
             alt="No Image"
             className="w-full h-full object-cover opacity-70"
           />
+        )}
+
+        {/* 🔹 Sold badge overlay */}
+        {isSold && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <span className="bg-red-600 text-white text-lg font-bold px-4 py-2 rounded-lg shadow-lg">
+              SOLD OUT
+            </span>
+          </div>
         )}
       </div>
 
@@ -108,35 +128,39 @@ export function ProductCard({ product = {}, onContact, onDelete }) {
         </span>
 
         <div className="flex gap-2">
-          {/* Add / Remove toggle */}
-          <Button
-            onClick={handleToggleCart}
-            disabled={!product?._id}
-            className={`${
-              inCart
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-primary-500 hover:bg-primary-600"
-            } text-white`}
-          >
-            {inCart ? "Remove" : "Add"}
-          </Button>
+          {!isSold ? (
+            <>
+              {/* Add / Remove toggle */}
+              <Button
+                onClick={handleToggleCart}
+                disabled={!productId}
+                className={`${
+                  inCart
+                    ? "bg-red-500 hover:bg-red-600"
+                    : "bg-primary-500 hover:bg-primary-600"
+                } text-white`}
+              >
+                {inCart ? "Remove" : "Add"}
+              </Button>
 
-          {/* Contact seller */}
-          <Button
-            onClick={() => onContact?.(product)}
-            className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
-          >
-            Contact
-          </Button>
+              {/* Contact seller */}
+              <Button
+                onClick={() => onContact?.(product)}
+                className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
+              >
+                Contact
+              </Button>
 
-          {/* Remove Product (always shown, requires deleteKey prompt) */}
-          {product?._id && (
-            <Button
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              Remove Product
-            </Button>
+              {/* Mark as Sold */}
+              <Button
+                onClick={handleMarkSold}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Mark as Sold
+              </Button>
+            </>
+          ) : (
+            <span className="text-red-600 font-semibold">SOLD</span>
           )}
         </div>
       </div>

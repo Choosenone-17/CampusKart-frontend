@@ -32,13 +32,10 @@ export function Products({ onAddProductClick, onContactSeller }) {
     },
   });
 
-  // Delete product mutation
-  const deleteMutation = useMutation({
-    mutationFn: async ({ id, removalKey }) => {
-      if (!removalKey) throw new Error("Delete key is required");
-      await api.delete(`/api/products/${id}`, {
-        data: { deleteKey: removalKey },
-      });
+  // ✅ Mark as Sold mutation
+  const markAsSoldMutation = useMutation({
+    mutationFn: async ({ id, secretKey }) => {
+      await api.post(`/api/products/${id}/mark-sold`, { secretKey });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["products"]);
@@ -46,7 +43,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
   });
 
   // Apply filters
-  const filteredProducts = products.filter((product) => {
+  let filteredProducts = products.filter((product) => {
     const matchesSearch =
       !searchQuery ||
       product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -57,6 +54,13 @@ export function Products({ onAddProductClick, onContactSeller }) {
       product.category?.toLowerCase() === selectedCategory.toLowerCase();
 
     return matchesSearch && matchesCategory;
+  });
+
+  // ✅ Sort available first, sold last
+  filteredProducts.sort((a, b) => {
+    if (a.status === "sold" && b.status !== "sold") return 1;
+    if (a.status !== "sold" && b.status === "sold") return -1;
+    return 0;
   });
 
   return (
@@ -166,11 +170,11 @@ export function Products({ onAddProductClick, onContactSeller }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredProducts.map((product) => (
                 <ProductCard
-                  key={product._id}
+                  key={product.id || product._id} // ✅ safe key
                   product={product}
                   onContact={onContactSeller}
-                  onDelete={(id, removalKey) =>
-                    deleteMutation.mutate({ id, removalKey })
+                  onMarkSold={(id, secretKey) =>
+                    markAsSoldMutation.mutate({ id, secretKey })
                   }
                 />
               ))}

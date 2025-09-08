@@ -16,6 +16,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
   });
 
   const [cartItems, setCartItems] = useState([]);
+   const [showAlert, setShowAlert] = useState(true);
 
   const handleAddToCart = (productId) => {
     setCartItems((prev) =>
@@ -33,6 +34,22 @@ export function Home({ onAddProductClick, onContactSeller }) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      {/* 🚧 ALERT BOX */}
+      {showAlert && (
+        <div className="bg-yellow-200 text-yellow-900 text-center p-4 font-medium">
+          <p>
+            🚧 Work in progress: Image uploads and database are under maintenance. Buyers are requested to ask for images via contact option before purchasing items. 
+            Sorry for the inconvenience caused!
+          </p>
+          <button
+            onClick={() => setShowAlert(false)}
+            className="mt-2 px-4 py-1 bg-yellow-500 text-white rounded-lg"
+          >
+            OK
+          </button>
+        </div>
+      )}
+
 
       {/* HERO SECTION */}
       <section className="bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 py-28">

@@ -50,13 +50,11 @@ export function Products({ onAddProductClick, onContactSeller }) {
       return res.data; // { product: {...}, secretKey }
     },
     onSuccess: (data) => {
-      // ⚡ Important: add only the product to the cache
       queryClient.setQueryData(["products"], (old = []) => [
         data.product,
         ...old,
       ]);
 
-      // Show SweetAlert with secret key
       Swal.fire({
         icon: "success",
         title: "✅ Product Added Successfully!",
@@ -191,7 +189,8 @@ export function Products({ onAddProductClick, onContactSeller }) {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {/* ✅ Changed xl:grid-cols-4 → xl:grid-cols-3 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
               {filteredProducts.map((product) => (
                 <ProductCard
                   key={product.id || product._id}

@@ -156,7 +156,7 @@ export function ProductCard({ product = {}, onContact, onMarkSold }) {
                 onClick={handleMarkSold}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
-                Mark as Sold
+                Soldout
               </Button>
             </>
           ) : (

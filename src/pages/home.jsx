@@ -16,7 +16,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
   });
 
   const [cartItems, setCartItems] = useState([]);
-   const [showAlert, setShowAlert] = useState(true);
+  const [showAlert, setShowAlert] = useState(true);
 
   const handleAddToCart = (productId) => {
     setCartItems((prev) =>
@@ -49,7 +49,6 @@ export function Home({ onAddProductClick, onContactSeller }) {
           </button>
         </div>
       )}
-
 
       {/* HERO SECTION */}
       <section className="bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 py-28">
@@ -144,7 +143,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
           </div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 animate-pulse">
                   <div className="bg-gray-200 dark:bg-gray-700 h-48 rounded-lg mb-4"></div>
@@ -179,7 +178,7 @@ export function Home({ onAddProductClick, onContactSeller }) {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12" data-testid="featured-products">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12" data-testid="featured-products">
                 {featuredProducts.map((product) => (
                   <ProductCard
                     key={product._id}

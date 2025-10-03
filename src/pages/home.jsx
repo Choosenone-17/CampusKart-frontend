@@ -131,83 +131,82 @@ export function Home({ onAddProductClick, onContactSeller }) {
       </section>
 
       {/* PRODUCTS SECTION */}
-<section id="products" className="py-20 bg-gray-50 dark:bg-gray-900">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="text-center mb-16">
-      <h2 className="text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
-        Featured Products
-      </h2>
-      <p className="text-2xl lg:text-3xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-        Discover the latest items from your campus community
-      </p>
-    </div>
-
-    {/* Flex row for promos + grid */}
-    <div className="lg:flex lg:gap-6">
-      
-      {/* LEFT PROMO */}
-      <div className="hidden lg:block w-48 flex-shrink-0">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 text-center">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Special Offer
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-            Discounts on books & supplies
-          </p>
-          <Button className="bg-primary-500 hover:bg-primary-600 text-white w-full text-sm py-2">
-            Contact Us
-          </Button>
-        </div>
-      </div>
-
-      {/* ORIGINAL PRODUCT GRID (unchanged) */}
-      <div className="flex-1">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12" data-testid="featured-products">
-          {featuredProducts.map((product) => (
-            <ProductCard
-              key={product._id}
-              product={product}
-              onContact={onContactSeller}
-              inCart={cartItems.includes(product._id)}
-              onAddToCart={() => handleAddToCart(product._id)}
-            />
-          ))}
-        </div>
-
-        {products.length > 8 && (
-          <div className="text-center">
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white px-8 py-3 text-lg font-semibold"
-              onClick={() => (window.location.href = "/products")}
-              data-testid="button-view-all"
-            >
-              View All Products
-            </Button>
+      <section id="products" className="py-20 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
+              Featured Products
+            </h2>
+            <p className="text-2xl lg:text-3xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              Discover the latest items from your campus community
+            </p>
           </div>
-        )}
-      </div>
 
-      {/* RIGHT PROMO */}
-      <div className="hidden lg:block w-48 flex-shrink-0">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 text-center">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Join Us
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-            Share your items with campus
-          </p>
-          <Button className="bg-primary-500 hover:bg-primary-600 text-white w-full text-sm py-2">
-            Contact Us
-          </Button>
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 animate-pulse">
+                  <div className="bg-gray-200 dark:bg-gray-700 h-48 rounded-lg mb-4"></div>
+                  <div className="space-y-2">
+                    <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded"></div>
+                    <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded w-3/4"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-12 max-w-md mx-auto shadow-lg">
+                <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Plus className="h-8 w-8 text-primary-500" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  No products yet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  Be the first to list an item on your campus marketplace!
+                </p>
+                <Button
+                  onClick={onAddProductClick}
+                  className="bg-primary-500 hover:bg-primary-600 text-white"
+                  data-testid="button-first-product"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add First Product
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12" data-testid="featured-products">
+                {featuredProducts.map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    onContact={onContactSeller}
+                    inCart={cartItems.includes(product._id)}
+                    onAddToCart={() => handleAddToCart(product._id)}
+                  />
+                ))}
+              </div>
+
+              {products.length > 8 && (
+                <div className="text-center">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white px-8 py-3 text-lg font-semibold"
+                    onClick={() => (window.location.href = "/products")}
+                    data-testid="button-view-all"
+                  >
+                    View All Products
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
+      </section>
 
       {/* FOOTER */}
       <footer className="bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 py-20 w-full">

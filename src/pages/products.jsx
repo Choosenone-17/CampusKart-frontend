@@ -204,78 +204,7 @@ export function Products({ onAddProductClick, onContactSeller }) {
             </div>
           </>
         )}
-         {/* FOOTER */}
-      <footer className="bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 py-20 w-full">
-        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-
-            {/* Brand Section */}
-            <div className="text-left sm:text-center md:text-left">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">CampusKart</h1>
-              <p className="text-lg text-gray-900 dark:text-white">
-                Your campus marketplace for affordable, safe, and student-focused trading.
-                Connect, buy, and sell faster with CampusKart.
-              </p>
-              <div className="flex space-x-4 mt-4 text-gray-400">
-                <a href="#" className="hover:text-white"><FaFacebookF /></a>
-                <a href="#" className="hover:text-white"><FaTwitter /></a>
-                <a href="#" className="hover:text-white"><FaLinkedinIn /></a>
-                <a href="#" className="hover:text-white"><FaInstagram /></a>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div className="text-left sm:text-center md:text-left">
-              <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white">Start Selling</a></li>
-                <li><a href="/products" className="hover:text-white">Browse Products</a></li>
-                <li><a href="#" className="hover:text-white">About Us</a></li>
-                <li><a href="#" className="hover:text-white">Contact</a></li>
-              </ul>
-            </div>
-
-            {/* Legal Section */}
-            <div className="text-left sm:text-center md:text-left">
-              <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Legal</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white">Terms & Conditions</a></li>
-                <li><a href="#" className="hover:text-white">Refund Policy</a></li>
-                <li><a href="#" className="hover:text-white">Shipping Policy</a></li>
-              </ul>
-            </div>
-
-            {/* Contact Section */}
-            <div className="text-left sm:text-center md:text-left">
-              <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Get In Touch</h4>
-              <ul className="space-y-2 text-lg">
-                <li>
-                  <a href="mailto:campuskart17@gmail.com" className="hover:text-white">
-                    ✉︎ campuskart17@gmail.com
-                  </a>
-                </li>
-                <li>
-                  <a href="tel:+919179337751" className="hover:text-white">
-                    📞 +91 9179337751
-                  </a>
-                </li>
-                <li>📍 SGSITS, Indore</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Footer Bottom */}
-          <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between">
-            <p className="text-sm text-gray-400">
-              © {new Date().getFullYear()} CampusKart. All rights reserved.
-            </p>
-            <p className="text-sm text-gray-400">
-              Made with ❤️ by CampusKart Team
-            </p>
-          </div>
-        </div>
-      </footer>
+        
       </div>
     </div>
   );
